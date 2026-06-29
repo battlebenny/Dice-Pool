@@ -584,7 +584,7 @@ export const DiceCanvas: React.FC<DiceCanvasProps> = ({
         ref={canvasRef}
         width={dimensions.width}
         height={dimensions.height}
-        className={`w-full h-full block transition-opacity duration-700 ${
+        className={`absolute inset-0 w-full h-full block transition-opacity duration-700 ${
           isMasked ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
         id="dice-physics-canvas"

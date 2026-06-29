@@ -15,3 +15,5 @@ Suivi de l'avancement du développement de l'application de dés physiques.
 - [x] Étape 11 : Ajustement de la hauteur du canvas physique pour qu'il occupe 100% de la hauteur de son conteneur
 - [x] Étape 12 : Conversion en Progressive Web App (PWA) avec manifeste d'installation, icône haute définition dédiée, service worker et bannières de gestion de cache / mise à jour à la livraison de nouvelles versions
 - [x] Étape 13 : Sécurisation du geste de secousse sur mobile (interdiction pendant la phase masquée ou révélée, obligation de toucher l'écran pour relancer quand l'arène est visible)
+- [x] Étape 14 : Correction du bug d'auto-agrandissement indéfini sous Google Chrome par un positionnement absolu du Canvas brisant la boucle ResizeObserver
+

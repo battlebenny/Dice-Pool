@@ -11,8 +11,7 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'prompt',
-        manifestFilename: 'manifest.json',
-        includeAssets: ['icon-512-v1.png', 'icon-192-v1.png', 'icon-maskable-v1.png'],
+        includeAssets: ['icon-512.jpg'],
         manifest: {
           name: 'Dice Pool - Simulateur Physique 2.5D',
           short_name: 'Dice Pool',
@@ -20,27 +19,14 @@ export default defineConfig(() => {
           theme_color: '#0f172a',
           background_color: '#0f172a',
           display: 'standalone',
-          orientation: 'portrait',
           scope: '/',
           start_url: '/',
           icons: [
             {
-              src: '/icon-192-v1.png',
-              sizes: '192x192',
-              type: 'image/png',
-              purpose: 'any'
-            },
-            {
-              src: '/icon-512-v1.png',
+              src: 'icon-512.jpg',
               sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any'
-            },
-            {
-              src: '/icon-maskable-v1.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'maskable'
+              type: 'image/jpeg',
+              purpose: 'any maskable'
             }
           ]
         },
@@ -70,10 +56,6 @@ export default defineConfig(() => {
               }
             }
           ]
-        },
-        devOptions: {
-          enabled: true,
-          type: 'module'
         }
       })
     ],

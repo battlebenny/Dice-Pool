@@ -13,3 +13,5 @@ Suivi de l'avancement du développement de l'application de dés physiques.
 - [x] Étape 9 : Nettoyage et suppression de l'en-tête de statut redondant dans l'arène de lancer pour maximiser la hauteur
 - [x] Étape 10 : Correction du bug d'initialisation des dés figés à 1 sur l'arène (synchronisation de `isRollingRef` au montage)
 - [x] Étape 11 : Ajustement de la hauteur du canvas physique pour qu'il occupe 100% de la hauteur de son conteneur
+- [x] Étape 12 : Conversion en Progressive Web App (PWA) avec manifeste d'installation, icône haute définition dédiée, service worker et bannières de gestion de cache / mise à jour à la livraison de nouvelles versions
+- [x] Étape 13 : Sécurisation du geste de secousse sur mobile (interdiction pendant la phase masquée ou révélée, obligation de toucher l'écran pour relancer quand l'arène est visible)

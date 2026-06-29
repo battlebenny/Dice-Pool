@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 import { DiceCanvas, DieState } from './components/DiceCanvas';
 import { diceAudio } from './utils/audio';
 import { 
@@ -53,6 +54,19 @@ type GameState = 'idle' | 'rolling' | 'masked' | 'revealed';
 type ScreenState = 'start' | 'arena' | 'results';
 
 export default function App() {
+  const {
+    offlineReady: [offlineReady, setOfflineReady],
+    needRefresh: [needRefresh, setNeedRefresh],
+    updateServiceWorker,
+  } = useRegisterSW({
+    onRegistered(r) {
+      console.log('SW Registered: ', r);
+    },
+    onRegisterError(error) {
+      console.error('SW registration error', error);
+    },
+  });
+
   const [gameState, setGameState] = useState<GameState>('idle');
   const [screen, setScreen] = useState<ScreenState>('start');
   const [dice, setDice] = useState<DieState[]>([]);
@@ -65,6 +79,8 @@ export default function App() {
 
   const gameStateRef = useRef<GameState>('idle');
   const shakeEnabledRef = useRef(true);
+  const screenRef = useRef<ScreenState>('start');
+  const isScreenTouchedRef = useRef<boolean>(false);
   const timerIntervalRef = useRef<number | null>(null);
 
   // Sync state with ref to avoid closure issues in listeners
@@ -75,6 +91,50 @@ export default function App() {
   useEffect(() => {
     shakeEnabledRef.current = shakeEnabled;
   }, [shakeEnabled]);
+
+  useEffect(() => {
+    screenRef.current = screen;
+  }, [screen]);
+
+  // Track global touch/mouse states to prevent accidental shake triggers
+  useEffect(() => {
+    const handleTouchStart = () => {
+      isScreenTouchedRef.current = true;
+    };
+    const handleTouchEnd = () => {
+      isScreenTouchedRef.current = false;
+    };
+    const handleMouseDown = () => {
+      isScreenTouchedRef.current = true;
+    };
+    const handleMouseUp = () => {
+      isScreenTouchedRef.current = false;
+    };
+
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+    window.addEventListener('mousedown', handleMouseDown, { passive: true });
+    window.addEventListener('mouseup', handleMouseUp, { passive: true });
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchEnd);
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, []);
+
+  // Auto-hide offlineReady toast after 4 seconds
+  useEffect(() => {
+    if (offlineReady) {
+      const timer = setTimeout(() => {
+        setOfflineReady(false);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [offlineReady, setOfflineReady]);
 
   // Initial local placement
   useEffect(() => {
@@ -140,8 +200,15 @@ export default function App() {
 
           // Shake detected
           if (speed > 800 && shakeEnabledRef.current) {
-            if (gameStateRef.current === 'idle' || gameStateRef.current === 'revealed') {
+            const isArenaVisible = screenRef.current === 'arena';
+            const isTouching = isScreenTouchedRef.current;
+
+            if (gameStateRef.current === 'idle') {
               triggerRoll();
+            } else if (gameStateRef.current === 'revealed' || gameStateRef.current === 'masked') {
+              if (isArenaVisible && isTouching) {
+                triggerRoll();
+              }
             } else if (gameStateRef.current === 'rolling') {
               // Add physical impulse directly to active rolling dice
               setShakeForce({ x: x * 6, y: -y * 6 });
@@ -468,9 +535,15 @@ export default function App() {
             <div className="font-mono text-[11px] text-slate-400 flex items-center gap-2">
               <HelpCircle className="w-3.5 h-3.5 text-slate-500" />
               <span>
-                {shakeEnabled && shakePermission === 'granted' 
-                  ? "Secouez votre appareil pour ré-influencer les dés !" 
-                  : "Glissez les dés sur l'écran pour les faire rebondir."}
+                {gameState === 'rolling' ? (
+                  shakeEnabled && shakePermission === 'granted' 
+                    ? "Secouez votre appareil pour influencer la course !" 
+                    : "Glissez les dés sur l'écran pour les faire rebondir."
+                ) : (
+                  shakeEnabled && shakePermission === 'granted'
+                    ? "Maintenez le doigt sur l'écran puis secouez pour relancer !"
+                    : "Glissez les dés pour interagir avec le plateau."
+                )}
               </span>
             </div>
 
@@ -691,6 +764,57 @@ export default function App() {
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* PWA: Offline Ready Toast */}
+      {offlineReady && (
+        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-slate-900/95 border border-emerald-500/30 text-white shadow-2xl flex items-center gap-3 backdrop-blur-md transition-all duration-300" id="pwa-offline-toast">
+          <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-400 shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-sans font-bold text-xs text-slate-200">Prêt pour le mode hors-ligne</span>
+            <span className="font-mono text-[9px] text-slate-400">L'application fonctionne désormais sans réseau</span>
+          </div>
+          <button onClick={() => setOfflineReady(false)} className="ml-2 font-mono text-[10px] text-slate-500 hover:text-slate-300 transition-colors">
+            Fermer
+          </button>
+        </div>
+      )}
+
+      {/* PWA: New Version Update Toast */}
+      {needRefresh && (
+        <div className="fixed bottom-6 left-6 right-6 md:left-auto md:right-6 z-50 p-5 rounded-2xl bg-slate-900/95 border border-pink-500/40 text-white shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 backdrop-blur-md transition-all duration-300 max-w-md" id="pwa-update-toast">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-pink-500/10 flex items-center justify-center border border-pink-500/20 text-pink-400 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 15H17m0 0a8 8 0 10-2.22-2.78L17 15" />
+              </svg>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-sans font-bold text-sm text-slate-200">Nouvelle version disponible !</span>
+              <span className="font-mono text-[10px] text-slate-400 mt-0.5 leading-normal">
+                Une mise à jour vient d'être livrée. Actualisez pour profiter des dernières nouveautés.
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5 self-end sm:self-auto shrink-0">
+            <button
+              onClick={() => setNeedRefresh(false)}
+              className="px-3.5 py-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 font-sans text-xs font-bold text-slate-300 transition-colors cursor-pointer"
+            >
+              Ignorer
+            </button>
+            <button
+              onClick={() => updateServiceWorker(true)}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-sans text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-pink-600/10 active:scale-95 cursor-pointer"
+            >
+              Mettre à jour
+            </button>
           </div>
         </div>
       )}

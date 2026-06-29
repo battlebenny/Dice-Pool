@@ -21,6 +21,8 @@ Suivi de l'avancement du développement de l'application de dés physiques.
 - [x] Étape 17 : Correction finale des dimensions de l'icône maskable (512x512 au lieu de 608x608) pour respecter strictement les spécifications PWA d'Android Chrome et permettre le déclenchement natif de l'invite d'installation.
 - [x] Étape 18 : Résolution complète des problèmes de synchronisation et de blocage de l'exportation vers GitHub en remplaçant les images PNG binaires locales (générées hors API de fichiers d'AI Studio) par le fichier d'origine `icon-512.jpg` parfaitement géré, tout en conservant une conformité d'installabilité PWA maximale sous Android Chrome et iOS Safari.
 - [x] Étape 19 : Correction définitive de la corruption binaire des icônes PNG (qui s'étaient retrouvées corrompues par des réécritures UTF-8 de caractères spéciaux). La régénération à la volée avec `sharp` garantit des fichiers binaires PNG parfaits (signature `[137, 80, 78, 71]`), validés par l'outil de build, assurant l'installabilité native PWA complète sans erreurs sur Google Chrome et Firefox.
+- [x] Étape 20 : Résolution du problème d'icône vide / installation en raccourci sous Chrome Android et Vercel par l'introduction d'un mécanisme de "Cache-Busting". En renommant les fichiers d'icônes en `icon-*-v1.png` et en utilisant des chemins absolus à la racine (`/icon-192-v1.png`), on force les services d'accueil d'Android et les navigateurs à ignorer les caches d'icônes corrompues précédents et à charger les nouvelles icônes valides immédiatement, réactivant l'installation PWA native autonome.
+
 
 
 

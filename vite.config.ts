@@ -12,7 +12,7 @@ export default defineConfig(() => {
       VitePWA({
         registerType: 'prompt',
         manifestFilename: 'manifest.json',
-        includeAssets: ['icon-512.png', 'icon-192.png', 'icon-maskable.png'],
+        includeAssets: ['icon-512-v1.png', 'icon-192-v1.png', 'icon-maskable-v1.png'],
         manifest: {
           name: 'Dice Pool - Simulateur Physique 2.5D',
           short_name: 'Dice Pool',
@@ -25,19 +25,19 @@ export default defineConfig(() => {
           start_url: '/',
           icons: [
             {
-              src: 'icon-192.png',
+              src: '/icon-192-v1.png',
               sizes: '192x192',
               type: 'image/png',
               purpose: 'any'
             },
             {
-              src: 'icon-512.png',
+              src: '/icon-512-v1.png',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any'
             },
             {
-              src: 'icon-maskable.png',
+              src: '/icon-maskable-v1.png',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'maskable'

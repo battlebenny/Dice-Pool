@@ -1,0 +1,6 @@
+{
+  "name": "Lancer de Dés Physiques",
+  "description": "Un jeu de lancer de 12 dés de formes et couleurs différentes avec de la physique réaliste, un compte à rebours et un mécanisme de révélation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

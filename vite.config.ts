@@ -11,6 +11,7 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'prompt',
+        manifestFilename: 'manifest.json',
         includeAssets: ['icon-512.png', 'icon-192.png', 'icon-maskable.png'],
         manifest: {
           name: 'Dice Pool - Simulateur Physique 2.5D',
